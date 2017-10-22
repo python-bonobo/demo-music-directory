@@ -52,8 +52,9 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'example', 'test']),
     include_package_data=True,
     install_requires=[
-        'Jinja2 (>= 2.9, < 2.10)', 'brotlipy (>= 0.7, < 0.8)', 'django (== 2.0a1)',
-        'django-extensions (>= 1.9, < 1.10)', 'psycopg2', 'whitenoise (>= 3.3, < 3.4)'
+        'Jinja2 (>= 2.9, < 2.10)', 'SPARQLWrapper (~= 1.8.0)', 'bonobo', 'brotlipy (>= 0.7, < 0.8)',
+        'django (== 2.0a1)', 'django-extensions (>= 1.9, < 1.10)', 'psycopg2', 'requests-cache (~= 0.4.13)',
+        'whitenoise (>= 3.3, < 3.4)'
     ],
     extras_require={'dev': []},
     url='',

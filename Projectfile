@@ -21,7 +21,10 @@ python.setup(
 )
 
 python.add_requirements(
-    'psycopg2'
+    'bonobo[sqlalchemy]',
+    'psycopg2',
+    'requests-cache ~=0.4.13',
+    'SPARQLWrapper ~=1.8.0',
 )
 
 # vim: ft=python:
