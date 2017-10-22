@@ -71,6 +71,9 @@ class Command(ETLCommand):
 
     def create_or_update_musicgroup(self, subject, *, genres, **attributes):
         obj, created, updated = self.create_or_update(MusicGroup, subject=subject, defaults=attributes)
+
+        obj.genres.add(*(MusicGenre.objects.get_or_create(subject=subject)[0] for subject in genres))
+
         yield NOT_MODIFIED
 
     @use('dbpedia')

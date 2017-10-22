@@ -1,2 +1,16 @@
 {% extends 'layout/base.html' %}
 
+{% block body %}
+    <div class="row">
+        <h1>Top-Musikgenres</h1>
+
+        {{ render_sync(request, 'mused.views.MusicGenreListView', limit=10) }}
+
+    </div>
+    <div class="row">
+        <h1>Top-Musikgruppen</h1>
+
+        {{ render_sync(request, 'mused.views.MusicGroupListView', limit=10) }}
+    </div>
+{% endblock %}
+

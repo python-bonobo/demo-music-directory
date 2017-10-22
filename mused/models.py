@@ -27,7 +27,7 @@ class RDF(models.Model):
         abstract = True
 
     def __str__(self):
-        return f'<{type(self).__name__} {self.title}>'
+        return self.title
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -40,4 +40,5 @@ class MusicGenre(RDF, BaseModel):
 
 
 class MusicGroup(RDF, BaseModel):
-    pass
+    genres = models.ManyToManyField(MusicGenre, related_name='groups')
+

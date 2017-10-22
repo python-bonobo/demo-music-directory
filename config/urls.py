@@ -17,8 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 
 import mused.urls
+from django_includes.views import include_view
 
 urlpatterns = [
     path('', include(mused.urls)),
     path('admin/', admin.site.urls),
+    path('esi/<token>', include_view, kwargs={'via': 'esi'}, name='esi'),
+
+]
+
+urlpatterns += [
+    path('hinclude/<token>', include_view, kwargs={'via': 'hinclude'}, name='hinclude')
 ]

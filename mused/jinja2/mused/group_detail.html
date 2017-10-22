@@ -3,10 +3,16 @@
 {% block body %}
     <div class="row">
         <div class="col-12">
-            <h1>{{ object.title }}</h1>
+            <h1>{{ object }}</h1>
             <p>
                 {{ object.description }}
             </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Genres von {{ object }}</h2>
+            {{ render_sync(request, 'mused.views.MusicGenreListView', musicgroup_id=object.id) }}
         </div>
     </div>
 {% endblock %}
