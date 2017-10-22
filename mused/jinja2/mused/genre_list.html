@@ -1,4 +1,4 @@
-{% extends 'mused/group_base.html' %}
+{% extends 'mused/genre_base.html' %}
 
 {% block body %}
     {% if object_list %}
@@ -7,12 +7,13 @@
                 {% include '_pagination.html' %}
             {% endif %}
 
-            {% for group in object_list %}
+            {% for genre in object_list %}
                 <div class="card col-6">
                     <div class="card-block">
-                        <a href="{{ url('group_detail', kwargs={'slug': group.slug}) }}">
-                            <h4 class="card-title">{{ group.title }}</h4>
+                        <a href="{{ url('genre_detail', kwargs={'slug': genre.slug}) }}">
+                            <h4 class="card-title">{{ genre.title }}</h4>
                         </a>
+                        {# <p class="card-text">{{ genre.name }}</p> #}
                     </div>
                 </div>
             {% endfor %}

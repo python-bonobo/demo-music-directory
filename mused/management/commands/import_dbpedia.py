@@ -8,7 +8,7 @@ from bonobo.config import use, ContextProcessor, Configurable
 from bonobo.constants import NOT_MODIFIED
 from bonobo.ext.django import ETLCommand
 from bonobo.util import ValueHolder
-from mused.models import MusicGroup
+from mused.models import MusicGroup, MusicGenre
 from mused.utils.sparql import RequestsSPARQLWrapper, Query
 
 
@@ -69,9 +69,26 @@ class Command(ETLCommand):
                     attributes['description'] = str(o)
         yield subject, {**kwargs, **attributes}
 
-    def create_or_update_musicgroup(self, musicgroup, *, genres, **attributes):
-        obj, created, updated = self.create_or_update(MusicGroup, subject=musicgroup, defaults=attributes)
+    def create_or_update_musicgroup(self, subject, *, genres, **attributes):
+        obj, created, updated = self.create_or_update(MusicGroup, subject=subject, defaults=attributes)
+        yield NOT_MODIFIED
 
+    @use('dbpedia')
+    def get_genre_attributes(self, dbpedia, subject):
+        attributes = {}
+        query = Query('*', where='<{subject}> ?p ?o FILTER (langMatches(lang(?o), "de"))')
+        for v, o in query.apply(dbpedia, 'p', 'o', subject=subject):
+            if v == rdflib.RDFS.label:
+                if not 'title' in attributes:
+                    attributes['title'] = str(o)
+            elif v == rdflib.RDFS.comment:
+                if not 'description' in attributes:
+                    attributes['description'] = str(o)
+
+        yield subject, attributes
+
+    def create_or_update_musicgenre(self, subject, **attributes):
+        obj, created, updated = self.create_or_update(MusicGenre, subject=subject, defaults=attributes)
         yield NOT_MODIFIED
 
     def get_graph(self, *args, **options):
@@ -83,6 +100,12 @@ class Command(ETLCommand):
             self.group_by_musicgroups,
             self.get_musicgroup_attributes,
             self.create_or_update_musicgroup,
+        )
+
+        graph.add_chain(
+            self.get_genre_attributes,
+            self.create_or_update_musicgenre,
+            _input=self.extract_genres,
         )
 
         return graph

@@ -25,11 +25,13 @@
                 {% block header_nav %}
                     <ul class="nav nav-pills float-right">
                         {% for section, route, label in (
+                            ('genres', 'genre_list', 'Genres'),
                             ('groups', 'group_list', 'Groups'),
                         ) %}
                             {% if section == current %}
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="{{ url(route) }}">{{ label }} <span class="sr-only">(current)</span></a>
+                                    <a class="nav-link active" href="{{ url(route) }}">{{ label }} <span
+                                            class="sr-only">(current)</span></a>
                                 </li>
                             {% else %}
                                 <li class="nav-item">
