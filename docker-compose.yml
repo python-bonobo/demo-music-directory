@@ -1,0 +1,15 @@
+version: '3'
+
+volumes:
+  postgres_data: {}
+  postgres_backup: {}
+
+services:
+  postgres:
+    image: postgres:10
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backup:/backups
+

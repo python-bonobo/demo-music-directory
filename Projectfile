@@ -1,0 +1,27 @@
+# mused (see github.com/python-medikit)
+
+from medikit import require
+
+python = require('python')
+django = require('django')
+git = require('git')
+make = require('make')
+nodejs = require('nodejs')
+webpack = require('webpack')
+yapf = require('yapf')
+
+python.setup(
+    name='mused',
+    description='Music directory demo / Bonobo ETL',
+    license='A2PL',
+    url='',
+    download_url='',
+    author='',
+    author_email='',
+)
+
+python.add_requirements(
+    'psycopg2'
+)
+
+# vim: ft=python:

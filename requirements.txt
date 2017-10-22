@@ -1,0 +1,12 @@
+-e .
+brotlipy==0.7.0
+cffi==1.11.2
+django-extensions==1.9.6
+django==2.0a1
+jinja2==2.9.6
+markupsafe==1.0
+psycopg2==2.7.3.1
+pycparser==2.18
+pytz==2017.2
+six==1.11.0
+whitenoise==3.3.1
