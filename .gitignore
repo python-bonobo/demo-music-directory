@@ -11,3 +11,5 @@
 /htmlcov
 /pylint.html
 /db.sqlite3
+/http_cache.sqlite
+/node_modules

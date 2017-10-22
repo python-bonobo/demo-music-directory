@@ -1,9 +1,15 @@
-from SPARQLWrapper import SPARQLWrapper
+import rdflib
+import requests
+import requests_cache
 
 import bonobo
-from bonobo.config import use
+from bonobo import Bag
+from bonobo.config import use, ContextProcessor, Configurable
+from bonobo.constants import NOT_MODIFIED
 from bonobo.ext.django import ETLCommand
-from mused.utils.sparql import Query
+from bonobo.util import ValueHolder
+from mused.models import MusicGroup
+from mused.utils.sparql import RequestsSPARQLWrapper, Query
 
 
 class AllGenresQuery(Query):
@@ -19,21 +25,72 @@ class AllGenresQuery(Query):
         )
 
 
+class MusicGroupsByGenreQuery(Query):
+    def __init__(self):
+        super().__init__('DISTINCT ?subject', where='?subject a schema:MusicGroup ; dbo:genre <{genre}>')
+
+
+class GroupByMusicGroups(Configurable):
+    @ContextProcessor
+    def grouped_genres(self, context):
+        grouped = yield ValueHolder({})
+        for musicgroup_id, genres in grouped.get().items():
+            context.send(Bag(musicgroup_id, genres=genres))
+
+    def call(self, grouped_genres, genre, musicgroup):
+        musicgroup_id = str(musicgroup)
+        if not musicgroup_id in grouped_genres:
+            grouped_genres[musicgroup_id] = set()
+        grouped_genres[musicgroup_id].add(str(genre))
+
+
 class Command(ETLCommand):
     @use('dbpedia')
     def extract_genres(self, dbpedia):
-        yield from AllGenresQuery().apply(dbpedia, 'genre', 'count')
+        yield from AllGenresQuery().apply(dbpedia, 'genre')
 
-    def load(self, genre, count):
-        self.stdout.write(f'{genre} {count}')
+    @use('dbpedia')
+    def join_musicgroups(self, dbpedia, genre):
+        for (subject, ) in MusicGroupsByGenreQuery().apply(dbpedia, 'subject', genre=genre):
+            yield genre, subject
+
+    group_by_musicgroups = GroupByMusicGroups()
+
+    @use('dbpedia')
+    def get_musicgroup_attributes(self, dbpedia, subject, **kwargs):
+        attributes = {}
+        query = Query('*', where='<{subject}> ?p ?o FILTER (langMatches(lang(?o), "de"))')
+        for v, o in query.apply(dbpedia, 'p', 'o', subject=subject):
+            if v == rdflib.RDFS.label:
+                if not 'title' in attributes:
+                    attributes['title'] = str(o)
+            elif v == rdflib.RDFS.comment:
+                if not 'description' in attributes:
+                    attributes['description'] = str(o)
+        yield subject, {**kwargs, **attributes}
+
+    def create_or_update_musicgroup(self, musicgroup, *, genres, **attributes):
+        obj, created, updated = self.create_or_update(MusicGroup, subject=musicgroup, defaults=attributes)
+
+        yield NOT_MODIFIED
 
     def get_graph(self, *args, **options):
-        return bonobo.Graph(
+        graph = bonobo.Graph()
+
+        graph.add_chain(
             self.extract_genres,
-            self.load,
+            self.join_musicgroups,
+            self.group_by_musicgroups,
+            self.get_musicgroup_attributes,
+            self.create_or_update_musicgroup,
         )
 
+        return graph
+
     def get_services(self):
+        requests_cache.install_cache('http_cache')
+        http = requests.Session()
         return {
-            'dbpedia': SPARQLWrapper('http://de.dbpedia.org/sparql'),
+            'dbpedia': RequestsSPARQLWrapper('http://de.dbpedia.org/sparql', http=http),
+            'http': http,
         }

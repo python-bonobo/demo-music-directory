@@ -1,4 +1,9 @@
 [style]
 based_on_style = pep8
+indent_width = 4
 column_limit = 120
 dedent_closing_brackets = true
+coalesce_brackets = true
+join_multiple_lines = true
+split_before_dict_set_generator = true
+

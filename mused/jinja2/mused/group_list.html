@@ -1,0 +1,28 @@
+{% extends 'layout/base.html' %}
+
+{% block body %}
+    {% if object_list %}
+        <div class="row">
+            {% if is_paginated %}
+                {% include '_pagination.html' %}
+            {% endif %}
+
+            {% for group in object_list %}
+                <div class="card col-6">
+                    <div class="card-block">
+                        <a href="{{ url('group_detail', kwargs={'slug': group.slug}) }}">
+                            <h4 class="card-title">{{ group.title }}</h4>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if is_paginated %}
+                {% include '_pagination.html' %}
+            {% endif %}
+        </div>
+
+    {% else %}
+        <p>No resources found!!! :(</p>
+    {% endif %}
+{% endblock %}

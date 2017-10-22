@@ -1,0 +1,35 @@
+<nav class="text-xs-center col-12" aria-label="Navigation entre les pages">
+  <ul class="pagination justify-content-center">
+    {# Previous #}
+    {% if page_obj.has_previous() %}
+      <li class="page-item">
+        <a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number() }}" aria-label="Page précédente">
+          <span aria-hidden="true">&laquo; précédente</span>
+        </a>
+      </li>
+    {% endif %}
+
+    {% for n in paginator.page_range(1, page_obj.number, paginator.num_pages) %}
+      {% if n == '...' %}
+        <li class="disabled page-item">
+          <a class="page-link" href="#">&hellip;</a>
+        </li>
+      {% else %}
+        <li class="page-item {% if page_obj.number == n %}disabled{% endif %}" {% if page_obj.number == n %}style="font-weight: bold"{% endif %}>
+          <a class="page-link" href="{{ request.path }}?page={{ n }}">
+            {{ n }}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {# Next #}
+    {% if page_obj.has_next() %}
+      <li class="page-item">
+        <a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number()}}" aria-label="Page suivante">
+          <span aria-hidden="true">suivante &raquo;</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
