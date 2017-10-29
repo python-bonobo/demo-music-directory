@@ -11,8 +11,14 @@ You need the "bleeding edge" version of bonobo to run this demo.
 .. code-block:: shell-session
 
     pip install git+https://github.com/python-bonobo/bonobo.git@develop#egg=bonobo
-    
+
 Read more about installation options: http://docs.bonobo-project.org/en/master/install.html
+
+Once this is done, just run:
+
+.. code-block:: shell-session
+
+    make install
 
 Application content
 :::::::::::::::::::
