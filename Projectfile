@@ -23,10 +23,11 @@ python.setup(
 python.add_constraints('bonobo')
 
 python.add_requirements(
+    'SPARQLWrapper ~=1.8.0',
+    'bonobo',
     'django_includes ~=0.2.0',
     'psycopg2 ~=2.7.3',
     'requests-cache ~=0.4.13',
-    'SPARQLWrapper ~=1.8.0',
 )
 
 # vim: ft=python:

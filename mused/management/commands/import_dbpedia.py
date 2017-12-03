@@ -3,13 +3,14 @@ import requests
 import requests_cache
 
 import bonobo
-from bonobo import Bag
 from bonobo.config import use, ContextProcessor, Configurable
 from bonobo.constants import NOT_MODIFIED
-from bonobo.ext.django import ETLCommand
+from bonobo.contrib.django import ETLCommand
 from bonobo.util import ValueHolder
 from mused.models import MusicGroup, MusicGenre
 from mused.utils.sparql import RequestsSPARQLWrapper, Query
+
+LANGUAGE = 'en'
 
 
 class AllGenresQuery(Query):
@@ -35,9 +36,9 @@ class GroupByMusicGroups(Configurable):
     def grouped_genres(self, context):
         grouped = yield ValueHolder({})
         for musicgroup_id, genres in grouped.get().items():
-            context.send(Bag(musicgroup_id, genres=genres))
+            context.send(musicgroup_id, {'genres': genres})
 
-    def call(self, grouped_genres, genre, musicgroup):
+    def __call__(self, grouped_genres, genre, musicgroup):
         musicgroup_id = str(musicgroup)
         if not musicgroup_id in grouped_genres:
             grouped_genres[musicgroup_id] = set()
@@ -46,20 +47,20 @@ class GroupByMusicGroups(Configurable):
 
 class Command(ETLCommand):
     @use('dbpedia')
-    def extract_genres(self, dbpedia):
+    def extract_genres(self, *, dbpedia):
         yield from AllGenresQuery().apply(dbpedia, 'genre')
 
     @use('dbpedia')
-    def join_musicgroups(self, dbpedia, genre):
-        for (subject, ) in MusicGroupsByGenreQuery().apply(dbpedia, 'subject', genre=genre):
+    def join_musicgroups(self, genre, *, dbpedia):
+        for (subject,) in MusicGroupsByGenreQuery().apply(dbpedia, 'subject', genre=genre):
             yield genre, subject
 
     group_by_musicgroups = GroupByMusicGroups()
 
     @use('dbpedia')
-    def get_musicgroup_attributes(self, dbpedia, subject, **kwargs):
-        attributes = {}
-        query = Query('*', where='<{subject}> ?p ?o FILTER (langMatches(lang(?o), "de"))')
+    def get_musicgroup_attributes(self, subject, attributes, *, dbpedia):
+        attributes = {**attributes}
+        query = Query('*', where='<{{subject}}> ?p ?o FILTER (langMatches(lang(?o), "{}"))'.format(LANGUAGE))
         for v, o in query.apply(dbpedia, 'p', 'o', subject=subject):
             if v == rdflib.RDFS.label:
                 if not 'title' in attributes:
@@ -67,9 +68,10 @@ class Command(ETLCommand):
             elif v == rdflib.RDFS.comment:
                 if not 'description' in attributes:
                     attributes['description'] = str(o)
-        yield subject, {**kwargs, **attributes}
+        genres = attributes.pop('genres')
+        yield subject, genres, attributes
 
-    def create_or_update_musicgroup(self, subject, *, genres, **attributes):
+    def create_or_update_musicgroup(self, subject, genres, attributes):
         obj, created, updated = self.create_or_update(MusicGroup, subject=subject, defaults=attributes)
 
         obj.genres.add(*(MusicGenre.objects.get_or_create(subject=subject)[0] for subject in genres))
@@ -77,9 +79,9 @@ class Command(ETLCommand):
         yield NOT_MODIFIED
 
     @use('dbpedia')
-    def get_genre_attributes(self, dbpedia, subject):
+    def get_genre_attributes(self, subject, *, dbpedia):
         attributes = {}
-        query = Query('*', where='<{subject}> ?p ?o FILTER (langMatches(lang(?o), "de"))')
+        query = Query('*', where='<{{subject}}> ?p ?o FILTER (langMatches(lang(?o), "{}"))'.format(LANGUAGE))
         for v, o in query.apply(dbpedia, 'p', 'o', subject=subject):
             if v == rdflib.RDFS.label:
                 if not 'title' in attributes:
@@ -90,7 +92,7 @@ class Command(ETLCommand):
 
         yield subject, attributes
 
-    def create_or_update_musicgenre(self, subject, **attributes):
+    def create_or_update_musicgenre(self, subject, attributes):
         obj, created, updated = self.create_or_update(MusicGenre, subject=subject, defaults=attributes)
         yield NOT_MODIFIED
 
@@ -117,6 +119,6 @@ class Command(ETLCommand):
         requests_cache.install_cache('http_cache')
         http = requests.Session()
         return {
-            'dbpedia': RequestsSPARQLWrapper('http://de.dbpedia.org/sparql', http=http),
+            'dbpedia': RequestsSPARQLWrapper('http://dbpedia.org/sparql', http=http),
             'http': http,
         }

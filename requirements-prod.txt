@@ -1,0 +1,2 @@
+-e .[prod]
+gunicorn==19.7.1
