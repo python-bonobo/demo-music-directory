@@ -13,7 +13,7 @@ fs==2.0.17
 graphviz==0.8.1
 idna==2.6
 isodate==0.6.0
-jinja2==2.10
+jinja2==2.11.3
 markupsafe==1.0
 mondrian==0.6.0
 packaging==16.8

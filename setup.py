@@ -52,7 +52,7 @@ setup(
     packages=find_packages(exclude=['ez_setup', 'example', 'test']),
     include_package_data=True,
     install_requires=[
-        'bonobo', 'Jinja2 (>= 2.10, < 2.11)', 'SPARQLWrapper (~= 1.8.0)', 'bonobo', 'brotli (>= 1.0, < 1.1)',
+        'bonobo', 'Jinja2 (>= 2.10, < 2.12)', 'SPARQLWrapper (~= 1.8.0)', 'bonobo', 'brotli (>= 1.0, < 1.1)',
         'django (>= 2.0, < 2.1)', 'django-extensions (>= 1.9, < 1.10)', 'django_includes (~= 0.2.0)',
         'psycopg2 (~= 2.7.3)', 'requests-cache (~= 0.4.13)', 'whitenoise (== 4.0b4)'
     ],
