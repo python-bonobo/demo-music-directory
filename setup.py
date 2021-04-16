@@ -57,7 +57,7 @@ setup(
         'psycopg2 (~= 2.7.3)', 'requests-cache (~= 0.4.13)', 'whitenoise (== 4.0b4)'
     ],
     extras_require={
-        'dev': ['django-debug-toolbar (>= 1.8, < 1.9)', 'django-extensions (>= 1.9, < 1.10)', 'yapf'],
+        'dev': ['django-debug-toolbar (>= 1.8, < 1.12)', 'django-extensions (>= 1.9, < 1.10)', 'yapf'],
         'prod': ['gunicorn (== 19.7.1)']
     },
     url='',
