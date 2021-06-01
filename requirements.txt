@@ -32,6 +32,6 @@ sparqlwrapper==1.8.0
 stevedore==1.27.1
 typing==3.6.2
 unidecode==0.4.21
-urllib3==1.22
+urllib3==1.26.5
 whistle==1.0.0
 whitenoise==4.0b4
